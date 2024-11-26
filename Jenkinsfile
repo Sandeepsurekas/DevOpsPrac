@@ -36,7 +36,9 @@ pipeline {
         
         stage('Test') {
             steps {
-                sh "echo \$DOCKER_PASSWORD | docker login -u \$DOCKER_USERNAME --password-stdin"
+                withCredentials([usernamePassword(credentialsId: 'cbab744d-675c-4226-b593-7751c9a93755', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+                    sh 'echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin'
+                }
                 sh 'docker run yourproject python -m pytest'
             }
         }
