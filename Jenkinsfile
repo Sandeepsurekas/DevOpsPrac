@@ -14,25 +14,32 @@
 //    - Executes 'python -m pytest' to run all tests
 
 pipeline {
-    agent any
-    
-    stages {
-        stage('Checkout') {
-            steps {
-                checkout scm
-            }
-        }
-        
-        stage('Build') {
-            steps {
-                sh 'docker build -t yourproject .'
-            }
-        }
-        
-        stage('Test') {
-            steps {
-                sh 'docker run yourproject python -m pytest'
-            }
-        }
+  agent any
+
+  stages {
+    stage('Build') {
+      steps {
+        sh 'docker build -t my-flask-app .'
+        sh 'docker tag my-flask-app $sandeepsurekas/myapp:latest'
+      }
     }
-} 
+    stage('Test') {
+      steps {
+        sh 'docker run my-flask-app python -m pytest app/tests/'
+      }
+    }
+    stage('Deploy') {
+      steps {
+        withCredentials([usernamePassword(credentialsId: 'sandeepsurekas', passwordVariable: 'dckr_pat_vlN2X9a9CAaeqh9_N8p3epeTiq4', usernameVariable: 'DOCKER_USERNAME')]) {
+          sh "echo \$DOCKER_PASSWORD | docker login -u \$DOCKER_USERNAME --password-stdin docker.io"
+          sh 'docker push $sandeepsurekas/myapp:latest'
+        }
+      }
+    }
+  }
+  post {
+    always {
+      sh 'docker logout'
+    }
+  }
+}
