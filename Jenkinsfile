@@ -30,7 +30,7 @@ pipeline {
     }
     stage('Deploy') {
       steps {
-        withCredentials([usernamePassword(credentialsId: 'sandeepsurekas', passwordVariable: 'dckr_pat_vlN2X9a9CAaeqh9_N8p3epeTiq4', usernameVariable: 'DOCKER_USERNAME')]) {
+        withCredentials([usernamePassword(credentialsId: 'sandeepsurekas', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
           sh "echo \$DOCKER_PASSWORD | docker login -u \$DOCKER_USERNAME --password-stdin docker.io"
           sh 'docker push $sandeepsurekas/myapp:latest'
         }
