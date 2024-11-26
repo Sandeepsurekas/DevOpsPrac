@@ -14,32 +14,31 @@
 //    - Executes 'python -m pytest' to run all tests
 
 pipeline {
-  agent any
-
-  stages {
-    stage('Build') {
-      steps {
-        sh 'docker build -t my-flask-app .'
-        sh 'docker tag my-flask-app $sandeepsurekas/myapp:latest'
-      }
+    agent any
+    
+    environment {
+        DOCKER_USERNAME = credentials('docker-username') // Replace with your Jenkins credentials ID
+        DOCKER_PASSWORD = credentials('docker-password') // Replace with your Jenkins credentials ID
     }
-    stage('Test') {
-      steps {
-        sh 'docker run my-flask-app python -m pytest app/tests/'
-      }
-    }
-    stage('Deploy') {
-      steps {
-        withCredentials([usernamePassword(credentialsId: 'sandeepsurekas', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
-          sh "echo \$DOCKER_PASSWORD | docker login -u \$DOCKER_USERNAME --password-stdin docker.io"
-          sh 'docker push $sandeepsurekas/myapp:latest'
+    
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
         }
-      }
+        
+        stage('Build') {
+            steps {
+                sh 'docker build -t yourproject .'
+            }
+        }
+        
+        stage('Test') {
+            steps {
+                sh "echo \$DOCKER_PASSWORD | docker login -u \$DOCKER_USERNAME --password-stdin"
+                sh 'docker run yourproject python -m pytest'
+            }
+        }
     }
-  }
-  post {
-    always {
-      sh 'docker logout'
-    }
-  }
-}
+} 
