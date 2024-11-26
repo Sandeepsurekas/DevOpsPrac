@@ -30,7 +30,7 @@ pipeline {
         
         stage('Build') {
             steps {
-                sh 'docker build -t yourproject .'
+                sh 'docker build -t myapp .'
             }
         }
         
